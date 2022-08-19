@@ -1,0 +1,282 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              04/15/2021 16:27:12 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.exe main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <at89c5131.h>
+   2          #include "lcd.h"                    //Driver for interfacing lcd 
+   3          #include "serial.c" 
+   4          
+   5          
+   6          void match();
+   7          void sets_fun();
+   8          
+   9          char placeholder[6]={0,0,0,0,0,'\0'};        //string array for saving ascii of input sample
+  10          
+  11          
+  12          code unsigned char hyphen[]="-";
+  13          code unsigned char space[]=" ";
+  14          unsigned char disp1[]={0,'\0'};
+  15          unsigned char disp2[]={0, 0,'\0'};
+  16          code unsigned char disp3[]="Ad - 40";
+  17          code unsigned char disp4[]="40 - Ad";
+  18          code unsigned char disp5[]="40 - 40";
+  19          code unsigned char play1[]="player 1 won";  
+  20          code unsigned char play2[]="player 2 won";
+  21          
+  22          
+  23          
+  24          unsigned char input = 0;
+  25          int i;
+  26          int j;
+  27          int k;
+  28          int l;
+  29          int m;
+  30          int player1 = 0;
+  31          int player2 = 0;
+  32          int sets[3][2];
+  33          unsigned int set_flag[3] = {0, 0, 0};
+  34          int current_set = 0;
+  35          unsigned int set_score[2] = {0, 0};
+  36          int scores_non[4] = {0, 15, 30, 40};
+  37          
+  38          
+  39          
+  40          void main(void)
+  41          {
+  42   1        lcd_init();
+  43   1        uart_init();
+  44   1        transmit_string("************tennis***************\r\n");
+  45   1        transmit_string("**press 1 if player 1 wins point**\r\n");
+  46   1        transmit_string("**press 2 if player 2 wins point**\r\n");
+  47   1          msdelay(1000);
+  48   1        
+  49   1      
+  50   1          for (i = 0; i < 3; i++)
+  51   1          {
+  52   2              for (j = 0; j < 2; j++)
+  53   2              {
+  54   3                  sets[i][j] = 0;
+C51 COMPILER V9.60.0.0   MAIN                                                              04/15/2021 16:27:12 PAGE 2   
+
+  55   3              }
+  56   2          }
+  57   1          
+  58   1          for (l = 0; l < 3; l++)
+  59   1          {
+  60   2              while(!set_flag[l])
+  61   2              {
+  62   3                  if (sets[l][0] < 6 & sets[l][1] < 6)
+  63   3                  {
+  64   4                      match();
+  65   4                  }
+  66   3                  else 
+  67   3                  {
+  68   4                      if (sets[l][0] > sets[l][1])
+  69   4                      {
+  70   5                          if (sets[l][0] - sets[l][1] > 1)
+  71   5                          {
+  72   6                              set_flag[l] = 1;
+  73   6                              player1++;
+  74   6                              current_set++;
+  75   6                          }
+  76   5                          else
+  77   5                          {
+  78   6                              match();
+  79   6                          }
+  80   5                      }
+  81   4                      else if (sets[l][0] < sets[l][1])
+  82   4                      {
+  83   5                          if (sets[l][1] - sets[l][0] > 1)
+  84   5                          {
+  85   6                              set_flag[l] = 1;
+  86   6                              player2++;
+  87   6                              current_set++;
+  88   6                          }
+  89   5                          else
+  90   5                          {
+  91   6                              match();
+  92   6                          }
+  93   5                      }
+  94   4                      else
+  95   4                      {
+  96   5                          match();
+  97   5                      }
+  98   4                  }
+  99   3              }
+ 100   2      
+ 101   2              if (player1 == 2)
+ 102   2              {
+ 103   3                  lcd_cmd(0xC0);
+ 104   3                  lcd_write_string(play1);
+ 105   3                  msdelay(5000);
+ 106   3                  break;
+ 107   3              }
+ 108   2              else if(player2 == 2)
+ 109   2              {
+ 110   3                  lcd_cmd(0xC0);
+ 111   3                  lcd_write_string(play2);
+ 112   3                  msdelay(5000);
+ 113   3                  break;
+ 114   3              }
+ 115   2              else{}
+ 116   2          }
+C51 COMPILER V9.60.0.0   MAIN                                                              04/15/2021 16:27:12 PAGE 3   
+
+ 117   1          
+ 118   1      
+ 119   1      }
+ 120          
+ 121          void sets_fun()
+ 122          {
+ 123   1          lcd_init();
+ 124   1          lcd_cmd(0x80);
+ 125   1          for (k = 0; k <= current_set; k++)
+ 126   1              {
+ 127   2      
+ 128   2                int_to_string(sets[k][0],placeholder);
+ 129   2                disp1[0] = placeholder[4];
+ 130   2                lcd_write_string(disp1);
+ 131   2      
+ 132   2                lcd_write_string(hyphen);
+ 133   2      
+ 134   2                int_to_string(sets[k][1],placeholder);
+ 135   2                disp1[0] = placeholder[4];
+ 136   2                lcd_write_string(disp1);
+ 137   2      
+ 138   2                lcd_write_string(space);
+ 139   2              }
+ 140   1      }
+ 141          
+ 142          void match()
+ 143          {
+ 144   1          while(1)
+ 145   1          {
+ 146   2              input = receive_char();
+ 147   2              if (input == '1')
+ 148   2              {
+ 149   3                  set_score[0] = set_score[0] + 1;
+ 150   3              }
+ 151   2              else if (input == '2')
+ 152   2              {
+ 153   3                  set_score[1] = set_score[1] + 1;
+ 154   3              }
+ 155   2              else{}
+ 156   2              if (set_score[0] <= 3 && set_score[1] <= 3)
+ 157   2              {
+ 158   3                  sets_fun();
+ 159   3                  lcd_cmd(0xC0);
+ 160   3      
+ 161   3                  int_to_string(scores_non[set_score[0]],placeholder);
+ 162   3                  disp2[0] = placeholder[3];
+ 163   3                disp2[1] = placeholder[4];
+ 164   3                lcd_write_string(disp2);
+ 165   3      
+ 166   3                lcd_write_string(hyphen);
+ 167   3      
+ 168   3                int_to_string(scores_non[set_score[1]],placeholder);
+ 169   3                  disp2[0] = placeholder[3];
+ 170   3                disp2[1] = placeholder[4];
+ 171   3                lcd_write_string(disp2);
+ 172   3              }
+ 173   2              else
+ 174   2              {
+ 175   3                  if (set_score[0] > set_score[1])
+ 176   3                  {
+ 177   4                      if (set_score[0] - set_score[1] > 1)
+ 178   4                      {
+C51 COMPILER V9.60.0.0   MAIN                                                              04/15/2021 16:27:12 PAGE 4   
+
+ 179   5                          sets[l][0] = sets[l][0] + 1;
+ 180   5                          sets_fun();
+ 181   5                          set_score[0] = 0;
+ 182   5                          set_score[1] = 0;
+ 183   5      
+ 184   5                          lcd_cmd(0xC0);
+ 185   5      
+ 186   5                          int_to_string(scores_non[set_score[0]],placeholder);
+ 187   5                          disp2[0] = placeholder[3];
+ 188   5                          disp2[1] = placeholder[4];
+ 189   5                          lcd_write_string(disp2);
+ 190   5      
+ 191   5                          lcd_write_string(hyphen);
+ 192   5      
+ 193   5                          int_to_string(scores_non[set_score[1]],placeholder);
+ 194   5                          disp2[0] = placeholder[3];
+ 195   5                          disp2[1] = placeholder[4];
+ 196   5                          lcd_write_string(disp2);
+ 197   5                          break;
+ 198   5                      }
+ 199   4                      else
+ 200   4                      {
+ 201   5                          sets_fun();
+ 202   5                          lcd_cmd(0xC0);
+ 203   5                          lcd_write_string(disp3);
+ 204   5                      }
+ 205   4                  }
+ 206   3                  else if (set_score[1] > set_score[0])
+ 207   3                  {
+ 208   4                      if (set_score[1] - set_score[0] > 1)
+ 209   4                      {
+ 210   5      
+ 211   5                          sets[l][1] = sets[l][1] + 1;
+ 212   5                          sets_fun();
+ 213   5                          set_score[0] = 0;
+ 214   5                          set_score[1] = 0;
+ 215   5      
+ 216   5                          lcd_cmd(0xC0);
+ 217   5      
+ 218   5                          int_to_string(scores_non[set_score[0]],placeholder);
+ 219   5                          disp2[0] = placeholder[3];
+ 220   5                          disp2[1] = placeholder[4];
+ 221   5                          lcd_write_string(disp2);
+ 222   5      
+ 223   5                          lcd_write_string(hyphen);
+ 224   5      
+ 225   5                          int_to_string(scores_non[set_score[1]],placeholder);
+ 226   5                          disp2[0] = placeholder[3];
+ 227   5                          disp2[1] = placeholder[4];
+ 228   5                          lcd_write_string(disp2);
+ 229   5                          break;
+ 230   5                      }
+ 231   4                      else
+ 232   4                      {
+ 233   5                          sets_fun();
+ 234   5                          lcd_cmd(0xC0);
+ 235   5                          lcd_write_string(disp4);
+ 236   5                      }
+ 237   4                  }
+ 238   3                  else
+ 239   3                  {
+ 240   4                      sets_fun();
+C51 COMPILER V9.60.0.0   MAIN                                                              04/15/2021 16:27:12 PAGE 5   
+
+ 241   4                      lcd_cmd(0xC0);
+ 242   4                      lcd_write_string(disp5);
+ 243   4                      set_score[0] = set_score[0] - 1;
+ 244   4                      set_score[1] = set_score[1] - 1;
+ 245   4                  }
+ 246   3              }
+ 247   2      
+ 248   2          }
+ 249   1          msdelay(100);
+ 250   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1336    ----
+   CONSTANT SIZE    =    164    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     58      11
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      2    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
